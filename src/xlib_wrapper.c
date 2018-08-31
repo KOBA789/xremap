@@ -58,9 +58,23 @@ Window
 get_focused_window(Display *display)
 {
   Window window;
-  int focus_state;
 
-  XGetInputFocus(display, &window, &focus_state);
+  Atom actual_type;
+  int actual_format;
+  unsigned long _nitems;
+  unsigned long bytes_after;
+  unsigned char *prop;
+  int status;
+
+  Window root = XDefaultRootWindow(display);
+  Atom request = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+  status = XGetWindowProperty(display, root, request, 0, (~0L),
+			      False, AnyPropertyType, &actual_type,
+			      &actual_format, &_nitems, &bytes_after,
+			      &prop);
+  window = *((Window*)prop);
+  XFree(prop);
+
   return window;
 }
 
